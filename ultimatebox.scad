@@ -1,7 +1,8 @@
- storage_organizer();
+storage_organizer();
  //bavel_label();
- //round_bavel_label();
-$fn=11;
+ //bavel_round_label();
+ //round_label();
+$fn=15;
 
 module cube_rounded(v, radius, center=false)
 {
@@ -31,11 +32,29 @@ module label(
     );
 }
 
-module bavel_label(
+module round_label(
+    label_length = 50,
+    label_width  = 10,
+    label_height = 10,
+    radius = 1,
+){
+    intersection() {
+        label(label_length, label_width, label_height);
+        minkowski() {
+            translate([radius, 0, 0])
+            label(label_length - 2*radius, label_width-radius, label_height);
+            if (radius > 0)
+                cylinder(h=1, r=radius, $fn=16);
+        }
+    }
+}
+
+module bavel_round_label(
     label_length = 50,
     label_width  = 10,
     label_height = 10,
     bavel = 5,
+    radius = 0,
 ) {
     difference() {        
         translate([-bavel, 0, -bavel])
@@ -45,30 +64,11 @@ module bavel_label(
                 translate(v=[-2*bavel, bavel, -bavel])
                     cube([label_length + bavel * 4, label_width + bavel * 4, label_height + bavel * 4]);
                 minkowski() {
-                    label(label_length, label_width, label_height);
+                    round_label(label_length, label_width, label_height, radius);
                     sphere(bavel);
                 }
             }
             sphere(bavel);
-        }
-    }
-}
-
-module round_bavel_label(
-    label_length = 50,
-    label_width  = 10,
-    label_height = 20,
-    bavel = 5,
-    radius = 2,
-)
-{
-    intersection() {
-        translate([-bavel, 0, -bavel])
-            cube([label_length + bavel * 2, label_width + bavel * 2, label_height + bavel]);
-        translate([radius, -radius, 0])
-        minkowski() {
-            bavel_label(label_length - 2*radius, label_width, label_height, bavel);
-            cylinder(h=5, r=radius, $fn=16);
         }
     }
 }
@@ -79,14 +79,14 @@ module storage_organizer(
     height=50,
     radius=3,
     thickness_outer=2.4,
-    thickness_inner=2.4,
+    thickness_inner=4.8,
     num_x=2,
     num_y=2,
     label_length = 50,
-    label_width  = 25.4 / 2 + 4,
-    label_height = 16,
-    label_bavel = 5,
-    label_radius = 1,
+    label_width  = 15,
+    label_height = 10,
+    label_bavel = 3,
+    label_radius = 0,
 )
 {
     unit_x = (length - thickness_outer * 2 - (num_x-1) * thickness_inner) / num_x;
@@ -106,7 +106,7 @@ module storage_organizer(
                 cube_rounded([unit_x, unit_y, height*2], radius);
                 // label holder
                 translate([(unit_x - label_length) / 2, 0, height-label_height])
-                    round_bavel_label(label_length, label_width, label_height, label_bavel, label_radius);
+                    bavel_round_label(label_length, label_width, label_height, label_bavel, label_radius);
             }
     }
 }
